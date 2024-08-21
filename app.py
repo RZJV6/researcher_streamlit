@@ -11,14 +11,11 @@ from gpt_researcher.utils.enum import ReportSource, ReportType, Tone
 from gpt_researcher import GPTResearcher
 import streamlit as st
 
-
-
-
-report_type_dict = {"Summary - Short and fast (~2 min)" : "research_report",
+report_type_dict = {"Summary - Short and fast (~2 min)": "research_report",
                     "Detailed - In depth and longer (~5 min)": "detailed_report",
                     "Resource Report": "resource_report",
                     "Just chat with AI": "regular AI"
-                    } #, "multi_agents"
+                    }  # , "multi_agents"
 
 tone_dict = {member.value: member.name for member in Tone}
 
@@ -140,13 +137,14 @@ languages_direction = {
     "Zulu": True
 }
 
-
-st.set_page_config( #https://docs.streamlit.io/develop/api-reference/configuration/st.set_page_config
-    page_title = "gpt-researcher",
-    page_icon = "gptr-logo.png",
+st.set_page_config(  # https://docs.streamlit.io/develop/api-reference/configuration/st.set_page_config
+    page_title="gpt-researcher",
+    page_icon="gptr-logo.png",
     # layout="wide",  # optional: you can also use "centered" for a more narrow layout
     initial_sidebar_state="expanded"
 )
+
+
 @contextmanager
 def stdout_capture(output_func):
     with StringIO() as stdout, redirect_stdout(stdout):
@@ -159,6 +157,7 @@ def stdout_capture(output_func):
                 stdout.seek(0)
                 stdout.truncate(0)
                 st.chat_message("assistant").write(p)
+                st.session_state.messages.append({"role": "assistant", "content": p})
             return ret
 
         stdout.write = new_write
@@ -168,15 +167,21 @@ def stdout_capture(output_func):
 output = st.empty()
 
 
-
-
-
-
 async def get_report(query: str, report_type: str, tone) -> str:
-    researcher = GPTResearcher(query, report_type, tone,)
+    researcher = GPTResearcher(query, report_type, tone, )
     research_result = await researcher.conduct_research()
     report = await researcher.write_report()
     return report
+
+
+def submit_report(prompt, md_content, msg=None):
+    if not msg:
+        msg = f"here is your report base on {os.environ['RETRIEVER']} search"
+    st.chat_message("assistant").write(msg)
+    st.session_state.messages.append({"role": "assistant", "content": msg})
+    st.chat_message("ai").markdown(md_content, unsafe_allow_html=True)
+    st.session_state.messages.append({"role": "ai", "content": md_content, "label": "md"})
+    make_buttons(prompt, md_content)
 
 
 def translate(prompt, md_content, lang):
@@ -185,43 +190,33 @@ def translate(prompt, md_content, lang):
         response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
-                {"role": "system", "content": f'You are a translator assistant. Translate the user markdown content into language {lang}, while preserving all original markdown syntax. write it without any introductions, just the md content!. If the {lang} language is read from right to left, adjust the markdown formatting accordingly to ensure proper RTL (right-to-left) display.'},
+                {"role": "system",
+                 "content": f'You are a translator assistant. Translate the user markdown content into language {lang}, while preserving all original markdown syntax. write it without any introductions, just the md content!. If the {lang} language is read from right to left, adjust the markdown formatting accordingly to ensure proper RTL (right-to-left) display.'},
                 {"role": "user", "content": f'Here is the markdown content: {md_content}'}
             ]
         )
         # Extract the response
         ai_response = response.choices[0].message.content
-        ai_response_to_md = ai_response
+        ai_response_as_md = ai_response
         if not languages_direction[lang]:
             prepend_string = '<div style="direction: rtl; text-align: right;">\n\n'
-            ai_response_to_md = f"{prepend_string}{ai_response}\n</div>"
+            ai_response_as_md = f"{prepend_string}{ai_response}\n</div>"
 
         msg = f"your original report base on {os.environ['RETRIEVER']} search"
-        st.chat_message("assistant").write(msg)
-        st.chat_message("ai").markdown(md_content, unsafe_allow_html=True)
-        make_buttons(prompt,md_content)
-
+        submit_report(prompt, md_content, msg)
         msg = f"your translated to {lang} report base on {os.environ['RETRIEVER']} search"
-        st.chat_message("assistant").write(msg)
-        st.session_state.messages.append({"role": "assistant", "content": msg})
-        st.chat_message("ai").markdown(ai_response_to_md, unsafe_allow_html=True)
-        st.session_state.messages.append({"role": "ai", "content": ai_response_to_md})
-        make_buttons(prompt,ai_response_to_md)
+        submit_report(prompt, ai_response_as_md, msg)
     else:
-        msg =f"here is your report base on {os.environ['RETRIEVER']} search"
-        st.chat_message("assistant").write(msg)
-        st.session_state.messages.append({"role": "assistant", "content": msg})
-        st.chat_message("ai").markdown(md_content, unsafe_allow_html=True)
-        st.session_state.messages.append({"role": "ai", "content": md_content})
-        make_buttons(prompt, md_content)
+        submit_report(prompt, md_content)
 
-def make_buttons(prompt,md_content):
+
+def make_buttons(prompt, md_content):
     st.download_button(
         label="Download as Markdown",
         data=md_content,  # The content of the file
         file_name=f"{prompt}.md",  # The name of the file to be downloaded
-        mime="text/markdown" , # The MIME type for markdown files
-        key=f'{prompt}-{ random.randint(-10**9, 10**9)}'
+        mime="text/markdown",  # The MIME type for markdown files
+        key=f'{prompt}-{random.randint(-10 ** 9, 10 ** 9)}'
     )
     pdf = MarkdownPdf()
     with open("pdf_styles.css") as css:
@@ -232,12 +227,12 @@ def make_buttons(prompt,md_content):
                            data=pdf.out_file,
                            file_name=f"{prompt}.pdf",
                            mime="application/pdf",
-                           key=f'{prompt}-{random.randint(-10**9, 10**9)}')
+                           key=f'{prompt}-{random.randint(-10 ** 9, 10 ** 9)}')
+
 
 def get_image_base64(image_path):
     with open(image_path, "rb") as image_file:
         return base64.b64encode(image_file.read()).decode()
-
 
 
 with st.sidebar:
@@ -245,7 +240,7 @@ with st.sidebar:
     st.sidebar.header("The #1 Open Source AI Research Agent")
     st.markdown(
         "## How to use\n"
-        "1. 🔑 **Enter** your [OpenAI API key](https://platform.openai.com/account/api-keys) below\n"  
+        "1. 🔑 **Enter** your [OpenAI API key](https://platform.openai.com/account/api-keys) below\n"
         '2. 🔎 **Share your research question:** For example: "Plan a 5 day romantic trip to Paris", "how to optimize my Linkedin profile" or "Nvidia stock analysis"\n'
         "3. ⚙️ **Configure your search:** determine your engine, report type and style; choose if you want to additionally translate your response and view the research process.\n"
         "4. 📚 **Get** a comprehensive research report\n"
@@ -255,10 +250,10 @@ with st.sidebar:
         type="password",
         placeholder="Paste your OpenAI API key here (sk-...)",
         help="You can get your API key from https://platform.openai.com/account/api-keys.",  # noqa: E501
-        value=os.environ.get("OPENAI_API_KEY", None)
-              or st.session_state.get("OPENAI_API_KEY", ""),
+        value=st.session_state.get("OPENAI_API_KEY", ""),
     )
     os.environ['OPENAI_API_KEY'] = api_key_input
+    st.session_state["OPENAI_API_KEY"] = api_key_input
     st.markdown("---")
     st.markdown("# Research Setting")
     os.environ['RETRIEVER'] = st.selectbox("choose your research engine", ("duckduckgo", "arxiv",
@@ -278,7 +273,6 @@ with st.sidebar:
     "Made with ❤️ for Daniela"
     st.link_button("Invite me for a coffee ☕", "https://ko-fi.com/C0C2125R0E")
 
-
 logo_base64 = get_image_base64("gptr-logo.png")
 html_code = f"""
 <div style='text-align: center; font-size: 3.5rem; font-family: "Libre Baskerville", serif;'>
@@ -288,7 +282,6 @@ html_code = f"""
 """
 # Display the content using st.markdown
 st.markdown(html_code, unsafe_allow_html=True)
-
 
 st.markdown(
     """
@@ -300,10 +293,10 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
-st.markdown("<div style='text-align: center;  font-size:  1.5rem;  font-family: 'Libre Baskerville', serif;> Say Hello to GPT Researcher, your AI mate for rapid insights and comprehensive research. GPT Researcher takes care of everything from accurate source gathering to organization of research results - all in one platform designed to make your research process a breeze.</div>", unsafe_allow_html=True)
+st.markdown(
+    "<div style='text-align: center;  font-size:  1.5rem;  font-family: 'Libre Baskerville', serif;> Say Hello to GPT Researcher, your AI mate for rapid insights and comprehensive research. GPT Researcher takes care of everything from accurate source gathering to organization of research results - all in one platform designed to make your research process a breeze.</div>",
+    unsafe_allow_html=True)
 st.caption("🚀 GPT Researcher unofficial chatbot - Powered by Streamlit Cloud")
-
-
 
 if "messages" not in st.session_state:
     st.session_state["messages"] = [{"role": "assistant", "content": "Hello there"}]
@@ -311,10 +304,8 @@ if "messages" not in st.session_state:
     st.session_state.messages.append({"role": "assistant", "content": "What would you like me to research today?"})
 
 for message in st.session_state.messages:
-    if message['role'] == 'ai':
-        if 'content' in message:
-            st.markdown(message['content'],unsafe_allow_html=True)
-
+    if message['role'] == 'ai' and 'label' in message:
+        st.markdown(message['content'], unsafe_allow_html=True)
     else:
         st.chat_message(message["role"]).write(message["content"])
 
@@ -325,8 +316,6 @@ if prompt := st.chat_input():
 
     st.session_state.messages.append({"role": "user", "content": prompt})
     st.chat_message("user").write(prompt)
-
-
 
     try:
         if report_type_dict[report_type] == "regular AI":
@@ -353,5 +342,3 @@ if prompt := st.chat_input():
 
         # with open("noname.md",encoding='utf-8') as f:
         #     msg =f.read()
-
-
