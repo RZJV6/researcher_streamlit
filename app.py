@@ -1,23 +1,13 @@
 import random
 from contextlib import contextmanager, redirect_stdout
-
 from openai import OpenAI
 import asyncio
 import os
 from markdown_pdf import MarkdownPdf, Section
-import base64
 from io import StringIO
 from gpt_researcher.utils.enum import ReportSource, ReportType, Tone
 from gpt_researcher import GPTResearcher
 import streamlit as st
-#
-# import logging
-#
-# logging.basicConfig(level=logging.DEBUG,  # Set the lowest level of logging to capture all logs
-#                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-# logging.getLogger().setLevel(logging.DEBUG)
-# logger = logging.getLogger(__name__)
-
 
 
 report_type_dict = {"Summary - Short and fast (~2 min)": "research_report",
@@ -147,12 +137,11 @@ languages_direction = {
 }
 
 st.set_page_config(  # https://docs.streamlit.io/develop/api-reference/configuration/st.set_page_config
-    page_title="gpt-researcher",
+    page_title="AI GPT Researcher",
     page_icon="gptr-logo.png",
     # layout="wide",  # optional: you can also use "centered" for a more narrow layout
-    initial_sidebar_state="expanded"
+    # initial_sidebar_state="expanded"
 )
-
 
 @contextmanager
 def stdout_capture(output_func):
@@ -246,33 +235,42 @@ def make_buttons(prompt, md_content):
     pdf = MarkdownPdf()
     with open("pdf_styles.css") as css:
         text = css.read()
-        pdf.add_section(Section(md_content), text)
-        pdf.writer.close()
-        st.download_button(label="Download as PDF",
-                           data=pdf.out_file,
-                           file_name=f"{prompt}.pdf",
-                           mime="application/pdf",
-                           key=f'{prompt}-{random.randint(-10 ** 9, 10 ** 9)}')
-        st.session_state.messages.append({"role": "ai", "content": pdf.out_file,
-                                          "label": "Download as PDF",
-                                          "file_name": f"{prompt}.pdf",
-                                          "mime": "application/pdf",
-                                          "key": f'{prompt}-{random.randint(-10 ** 9, 10 ** 9)}'})
+    pdf.add_section(Section(md_content), text)
+    pdf.writer.close()
+    st.download_button(label="Download as PDF",
+                       data=pdf.out_file,
+                       file_name=f"{prompt}.pdf",
+                       mime="application/pdf",
+                       key=f'{prompt}-{random.randint(-10 ** 9, 10 ** 9)}')
+    st.session_state.messages.append({"role": "ai", "content": pdf.out_file,
+                                      "label": "Download as PDF",
+                                      "file_name": f"{prompt}.pdf",
+                                      "mime": "application/pdf",
+                                      "key": f'{prompt}-{random.randint(-10 ** 9, 10 ** 9)}'})
 
 
-def get_image_base64(image_path):
-    with open(image_path, "rb") as image_file:
-        return base64.b64encode(image_file.read()).decode()
 
+with open("gptr-logo-base64.txt", "r") as file:
+    logo_base64 = file.read()
 
 with st.sidebar:
-    st.sidebar.header(f'![](gptr-logo.png) GPT Researcher')
-    st.sidebar.header("The #1 Open Source AI Research Agent")
+    st.sidebar.html(f"""
+    <div id=sidebar align="center">'
+        <img src="data:image/png;base64,{logo_base64}" width="80">
+        <h1 style='font-size: 2rem;'>
+        <span style="background-image: linear-gradient(to right, #9867F0, #ED4E50); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+            GPT Researcher 
+        </span>
+        </h1>
+        <h2 style="font-size: 1rem; font-weight: 800; text-align: center; line-height: 1.2;">
+                The #1 Open Source AI Research Agent
+        </h2>            
+    </div>""")
     st.markdown(
-        "## How to use\n"
+        "# How to use\n"
         "1. 🔑 **Enter** your [OpenAI API key](https://platform.openai.com/account/api-keys) below\n"
         '2. 🔎 **Share your research question:** For example: "Plan a 5 day romantic trip to Paris", "how to optimize my Linkedin profile" or "Nvidia stock analysis"\n'
-        "3. ⚙️ **Configure your search:** determine your engine, report type and style; choose if you want to additionally translate your response and view the research process.\n"
+        "3. ⚙️ **Configure your search:** choose your search engine, report type, and style; decide whether to translate the report or view the research process.\n"
         "4. 📚 **Get** a comprehensive research report\n"
     )
     api_key_input = st.text_input(
@@ -292,51 +290,87 @@ with st.sidebar:
                                                                            "semantic_scholar"))
     tone = st.selectbox("In which tone would you like the report to be generated?", tone_dict.keys())
     report_type = st.selectbox("What type of report would you like me to generate?", report_type_dict.keys())
-    show_logs = st.checkbox("Show the research process")
-    translate_box = st.selectbox("Translate the report to any language", languages_direction.keys())
-    translate_question_box = st.checkbox("Search across the web in English (use this if your research question is not in English)")
+    show_logs = st.checkbox("Show the research process (logs)")
+    translate_box = st.selectbox("Translate the report to your language", languages_direction.keys(),help= "Select any other language to translate the report into")
+    translate_question_box = st.checkbox("Search across the web in English", help= "Use this if your research question is not in English, but you want the research process to involve sources in English")
 
     st.markdown("---")
     st.markdown("# About")
-    st.markdown(
-        "GPT Researcher takes care of everything from accurate source gathering to organization of research results - all in one platform designed to make your research process a breeze. \n "
-        "GPT Researcher aims to provide you with the most accurate and credible information from multiple online trusted sources, it organize the information and provide you with a comprehensive research report within minutes.\n"
-        "GPT Researcher is still in development and you are welcome to contribute on GitHub. This streamlit project aims to provide UI access to this amazing tool"
-
-    )
-    st.markdown("[GPT Researcher official page](https://gptr.dev/)")
+    st.markdown("""
+    - GPT Researcher takes care of everything from accurate source gathering to organization of research results - all in one platform designed to make your research process a breeze.  
+    - GPT Researcher aims to provide you with the most accurate and credible information from multiple online trusted sources, it organize the information and provide you with a comprehensive research report within minutes.  
+    - GPT Researcher is still in development and you are welcome to contribute on GitHub. This streamlit project aims to provide UI access to this amazing tool
+    - [GPT Researcher official page](https://gptr.dev/)
+    """)
     st.markdown("---")
-    "Made with ❤️ for Daniela"
+
+    # st.markdown("Made with ❤️")
+    # for Daniela
     st.link_button("Invite me for a coffee ☕", "https://ko-fi.com/C0C2125R0E")
 
-logo_base64 = get_image_base64("gptr-logo.png")
+
 html_code = f"""
-<div style='text-align: center; font-size: 3.5rem; font-family: "Libre Baskerville", serif;'>
-    <img src="data:image/png;base64,{logo_base64}" alt="" style="vertical-align: middle; ">
-    GPT Researcher
+<div id="responsive-section" align="center">
+    <img src="data:image/png;base64,{logo_base64}" width="80"> 
+    <h1 style=' text-align: center;'>
+        <span style="background-image: linear-gradient(to right, #9867F0, #ED4E50); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">GPT Researcher</span>
+    </h1>
+    <h2 style="font-weight: 800; text-align: center; line-height: 1.2;">Say Goodbye to Hours of Research</h2>
+    <h3 style='text-align: center;'> Say Hello to GPT Researcher, your AI mate for rapid insights and comprehensive research.</h3>
+    <p style="text-align: center;  color: gray; margin-top: 0.5em; margin-bottom: 0.5em;">🚀 GPT Researcher unofficial chatbot</p>
 </div>
-"""
-# Display the content using st.markdown
+""" + """
+<style>
+#responsive-section h1,
+#responsive-section h2,
+#responsive-section h3,
+#responsive-section p { 
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+}
+#responsive-section h1 {
+    font-size: 2.5rem;
+}
+
+#responsive-section h2 {
+    font-size: 1.5rem;
+}
+
+#responsive-section h3 {
+    font-size: 1.2rem;
+}
+
+#responsive-section p {
+    font-size: 0.75em;
+}
+
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+    #responsive-section h1 {
+        font-size: 2rem; !important;
+    }
+    #responsive-section h2 {
+        font-size: 1.3rem; !important;
+    }
+    #responsive-section h3 {
+        font-size: 1rem; !important;
+    }
+    #responsive-section p {
+        font-size: 0.56em; !important;
+    }
+    #responsive-section img {
+        max-width: 70px; !important;
+    }
+    #responsive-section {
+        padding: 0.5em; !important;
+    }
+}
+</style>"""
 st.markdown(html_code, unsafe_allow_html=True)
 
-st.markdown(
-    """
-    <h1 style="font-size: 2.5rem; font-weight: 800; text-align: center; line-height: 1.2;">
-        <span style="background-image: linear-gradient(to right, #9867F0, #ED4E50); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
-            Say Goodbye to Hours of Research
-        </span>
-    </h1>
-    """,
-    unsafe_allow_html=True
-)
-st.markdown(
-    "<div style='text-align: center;  font-size:  1.5rem;  font-family: 'Libre Baskerville', serif;> Say Hello to GPT Researcher, your AI mate for rapid insights and comprehensive research.</div>",
-    unsafe_allow_html=True)
-st.caption("🚀 GPT Researcher unofficial chatbot - Powered by Streamlit Cloud")
 
 if "messages" not in st.session_state:
     st.session_state["messages"] = [{"role": "assistant", "content": "Hello there"}]
-    st.session_state.messages.append({"role": "assistant", "content": "What a great day!"})
     st.session_state.messages.append({"role": "assistant", "content": "What would you like me to research today?"})
 
 for message in st.session_state.messages:
@@ -389,7 +423,6 @@ if prompt := st.chat_input():
     except Exception as e:
         msg = f"Caught exception while searching: {str(e)}"
         st.error(msg)
-
 
         # with open("noname.md",encoding='utf-8') as f:
         #     msg =f.read()
