@@ -9,11 +9,6 @@ from io import StringIO
 from gpt_researcher import GPTResearcher
 import streamlit as st
 from base import *
-import pathlib
-from bs4 import BeautifulSoup
-import shutil
-import streamlit.components.v1 as components
-
 
 
 
@@ -49,57 +44,10 @@ output = st.empty()
 
 
 
-st.markdown("""
-<div class="left-ad-div">
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1699814099300915"
-         crossorigin="anonymous"></script>
-    <!-- gpt on right -->
-    <ins class="adsbygoogle"
-         style="display:block"
-         data-ad-client="ca-pub-1699814099300915"
-         data-ad-slot="7430140409"
-         data-ad-format="auto"
-         data-full-width-responsive="true"></ins>
-    <script>
-         (adsbygoogle = window.adsbygoogle || []).push({});
-    </script>
-</div>
-    <style>
-        /* CSS for larger screens */
-        @media only screen and (min-width: 1100px) {
-            .left-ad-div {
-                width: 12%;
-                height: 100vh; 
-                position: fixed; 
-                top: 0;
-                right: 0;
-            }
-        }
-    </style>
-    <script>
-            window.onload = function() {
-            // Create the meta element
-            var meta = document.createElement('meta');
-            meta.name = "google-adsense-account";
-            meta.content = "ca-pub-1699814099300915";
 
-            // Append the meta element to the head tag
-            document.getElementsByTagName('head')[0].appendChild(meta);
-
-            // Create the script element
-            var script = document.createElement('script');
-            script.async = true;
-            script.src = "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1699814099300915";
-            script.crossOrigin = "anonymous";
-
-            // Append the script element to the head tag
-            document.getElementsByTagName('head')[0].appendChild(script);
-        }
-</script>
-""", unsafe_allow_html=True)
 
 async def get_report(query: str, report_type: str, tone) -> str:
-    researcher = GPTResearcher(query, report_type, tone, )
+    researcher = GPTResearcher(query, report_type, tone)
     research_result = await researcher.conduct_research()
     report = await researcher.write_report()
     return report
@@ -184,16 +132,18 @@ def make_buttons(prompt, md_content):
 
 with st.sidebar:
     st.sidebar.html(sidebar_html)
+    st.markdown("GPT Researcher is a powerful tool that intelligently searches the web for a research question and summarizes all the sources into a comprehensive academic-style report [(See a demo)](Examples_Page).")
 
     st.markdown(
         "# How to use\n"
         "1. 🔑 **Enter** your [OpenAI API key](https://platform.openai.com/account/api-keys) below\n"
-        '2. 🔎 **Share your research question:** For example: "Plan a 5 day romantic trip to Paris", "how to optimize my Linkedin profile" or "Nvidia stock analysis"\n'
-        "3. ⚙️ **Configure your search:** choose your search engine, report type, and style; decide whether to translate the report or view the research process.\n"
-        "4. 📚 **Get** a comprehensive research report.\n"
-
+        "2. ⚙️ **Configure your research:** While you can leave the configuration as default, you can additionally choose the web search engine, report type, and style decide whether to translate the report or view the research process.\n"
+        '3. 🔎 **Share your research question:** For example: "Plan a 5 day romantic trip to Paris", "how to optimize my Linkedin profile" or "Nvidia stock analysis"\n'
+        "4. 📚 **Get** a comprehensive research report."
     )
-    st.markdown("- [See a demo of the bot's responses](Examples_Page)")
+    st.markdown("---")
+    st.markdown("# Research Setting")
+
     api_key_input = st.text_input(
         "OpenAI API Key",
         type="password",
@@ -204,10 +154,7 @@ with st.sidebar:
     os.environ['OPENAI_API_KEY'] = api_key_input
     st.session_state["OPENAI_API_KEY"] = api_key_input
     openai_client = OpenAI()
-
-    st.markdown("---")
-    st.markdown("# Research Setting")
-    os.environ['RETRIEVER'] = st.selectbox("Choose your research engine", ("duckduckgo", "arxiv",
+    os.environ['RETRIEVER'] = st.selectbox("Choose web search engine", ("duckduckgo", "arxiv",
                                                                            "semantic_scholar"))
     tone = st.selectbox("In which tone would you like the report to be generated?", tone_dict.keys())
     report_type = st.selectbox("What type of report would you like me to generate?", report_type_dict.keys())
@@ -218,17 +165,17 @@ with st.sidebar:
     st.markdown("---")
     st.markdown("# About")
     st.markdown("""
+    - GPT Researcher is an open-source project led by Asaf Elovic and is still in development. This project aims to provide a UI for accessing this amazing tool, and it is based on version 0.9.0.
     - GPT Researcher takes care of everything from accurate source gathering to organization of research results - all in one platform designed to make your research process a breeze.  
-    - GPT Researcher aims to provide you with the most accurate and credible information from multiple online trusted sources, it organize the information and provide you with a comprehensive research report within minutes.  
-    - GPT Researcher is still in development and you are welcome to contribute on GitHub. This project aims to provide UI access to this amazing tool.
+    - The average research task takes around 3 minutes to complete, and costs ~$0.005. 
     - [GPT Researcher official page](https://gptr.dev/)
     """)
-    st.markdown("---")
+    # st.markdown("---")
 
     # st.markdown("Made with ❤️")
     # for Daniela
-    left, middle, right = st.columns([1,3,1], vertical_alignment="bottom")
-    middle.link_button("Invite me for a coffee ☕", "https://ko-fi.com/C0C2125R0E")
+    # left, middle, right = st.columns([1,3,1], vertical_alignment="bottom")
+    # middle.link_button("Invite me for a coffee ☕", "https://ko-fi.com/C0C2125R0E")
 
 
 

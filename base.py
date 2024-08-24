@@ -4,6 +4,9 @@ report_type_dict = {"Summary - Short and fast (~2 min)": "research_report",
                     "Resource Report": "resource_report",
                     "Subtopic report":"subtopic_report",
                     "Chat with AI (without research)": "regular AI"
+                  # ,"multi_agents": "multi_agents"
+                    # ,"detailed_report":"detailed_report"
+                    # ,"outline_report":"outline_report"
                     }  # , "multi_agents"
 
 tone_dict = {member.value: member.name for member in Tone}
@@ -201,3 +204,53 @@ sidebar_html =f"""
                 The #1 Open Source AI Research Agent
         </h2>            
     </div>"""
+
+# adsence code
+# st.markdown("""
+# <div class="left-ad-div">
+#     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1699814099300915"
+#          crossorigin="anonymous"></script>
+#     <!-- gpt on right -->
+#     <ins class="adsbygoogle"
+#          style="display:block"
+#          data-ad-client="ca-pub-1699814099300915"
+#          data-ad-slot="7430140409"
+#          data-ad-format="auto"
+#          data-full-width-responsive="true"></ins>
+#     <script>
+#          (adsbygoogle = window.adsbygoogle || []).push({});
+#     </script>
+# </div>
+#     <style>
+#         /* CSS for larger screens */
+#         @media only screen and (min-width: 1100px) {
+#             .left-ad-div {
+#                 width: 12%;
+#                 height: 100vh;
+#                 position: fixed;
+#                 top: 0;
+#                 right: 0;
+#             }
+#         }
+#     </style>
+#     <script>
+#             window.onload = function() {
+#             // Create the meta element
+#             var meta = document.createElement('meta');
+#             meta.name = "google-adsense-account";
+#             meta.content = "ca-pub-1699814099300915";
+#
+#             // Append the meta element to the head tag
+#             document.getElementsByTagName('head')[0].appendChild(meta);
+#
+#             // Create the script element
+#             var script = document.createElement('script');
+#             script.async = true;
+#             script.src = "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1699814099300915";
+#             script.crossOrigin = "anonymous";
+#
+#             // Append the script element to the head tag
+#             document.getElementsByTagName('head')[0].appendChild(script);
+#         }
+# </script>
+# """, unsafe_allow_html=True)
