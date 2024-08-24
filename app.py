@@ -9,6 +9,10 @@ from io import StringIO
 from gpt_researcher import GPTResearcher
 import streamlit as st
 from base import *
+import pathlib
+from bs4 import BeautifulSoup
+import shutil
+import streamlit.components.v1 as components
 
 
 
@@ -43,6 +47,56 @@ def stdout_capture(output_func):
 
 output = st.empty()
 
+
+
+st.markdown("""
+<div class="left-ad-div">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1699814099300915"
+         crossorigin="anonymous"></script>
+    <!-- gpt on right -->
+    <ins class="adsbygoogle"
+         style="display:block"
+         data-ad-client="ca-pub-1699814099300915"
+         data-ad-slot="7430140409"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+    <script>
+         (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+</div>
+    <style>
+        /* CSS for larger screens */
+        @media only screen and (min-width: 1100px) {
+            .left-ad-div {
+                width: 12%;
+                height: 100vh; 
+                position: fixed; 
+                top: 0;
+                right: 0;
+            }
+        }
+    </style>
+    <script>
+            window.onload = function() {
+            // Create the meta element
+            var meta = document.createElement('meta');
+            meta.name = "google-adsense-account";
+            meta.content = "ca-pub-1699814099300915";
+
+            // Append the meta element to the head tag
+            document.getElementsByTagName('head')[0].appendChild(meta);
+
+            // Create the script element
+            var script = document.createElement('script');
+            script.async = true;
+            script.src = "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1699814099300915";
+            script.crossOrigin = "anonymous";
+
+            // Append the script element to the head tag
+            document.getElementsByTagName('head')[0].appendChild(script);
+        }
+</script>
+""", unsafe_allow_html=True)
 
 async def get_report(query: str, report_type: str, tone) -> str:
     researcher = GPTResearcher(query, report_type, tone, )
@@ -173,7 +227,8 @@ with st.sidebar:
 
     # st.markdown("Made with ❤️")
     # for Daniela
-    st.link_button("Invite me for a coffee ☕", "https://ko-fi.com/C0C2125R0E")
+    left, middle, right = st.columns([1,3,1], vertical_alignment="bottom")
+    middle.link_button("Invite me for a coffee ☕", "https://ko-fi.com/C0C2125R0E")
 
 
 

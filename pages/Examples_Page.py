@@ -21,6 +21,10 @@ with st.sidebar:
                 The #1 Open Source AI Research Agent
         </h2>
     </div>""")
+    st.markdown("---")
+
+    left, middle, right = st.columns([1,3,1], vertical_alignment="bottom")
+    middle.link_button("Invite me for a coffee ☕", "https://ko-fi.com/C0C2125R0E")
 
 
 def show_md(q, md_file_path):
