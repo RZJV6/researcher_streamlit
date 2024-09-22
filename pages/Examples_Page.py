@@ -1,11 +1,11 @@
 import streamlit as st
 st.set_page_config(  # https://docs.streamlit.io/develop/api-reference/configuration/st.set_page_config
     page_title="AI GPT Researcher examples",
-    page_icon="gptr-logo.png",
+    page_icon="assets/gptr-logo.png",
     layout="wide",  # optional: you can also use "centered" for a more narrow layout
 
 )
-with open("gptr-logo-base64.txt", "r") as file:
+with open("assets/gptr-logo-base64.txt", "r") as file:
     logo_base64 = file.read()
 
 with st.sidebar:
@@ -101,36 +101,5 @@ show_md("Berkeley's philosophy towards the discussion of whether morality is obj
 show_md("What is the security and Weaknesses of the BlockDAG Protocol?", "assets/blockdag sec.md")
 show_md("What is the best way to sample in agriculture field?", "assets/sample in agriculture field.md")
 
-# from weasyprint import HTML, CSS
-#
-# # Specify the HTML file and the CSS file
-# html_file = 'html'
-# css_file = 'pdf_styles.css'
-#
-# # Convert HTML to PDF
-# HTML(html_file).write_pdf('output.pdf', stylesheets=[CSS(css_file)])
-# from xhtml2pdf import pisa
-#
-# def convert_html_to_pdf(source_html, output_filename):
-#     # Open the HTML file and read its content
-#     with open(source_html, 'r', encoding='utf-8') as html_file:
-#         html_content = html_file.read()
-#     with open("pdf_styles.css") as css_file:
-#         css = css_file.read()
-#     # html_content += "<style> " + css + "</style>"
-#
-#     # Open the output file in write-binary mode
-#     with open(output_filename, 'wb') as pdf_file:
-#         # Convert HTML to PDF
-#         pisa_status = pisa.CreatePDF(html_content, dest=pdf_file, default_css=css)
-#
-#     # Check for errors
-#     if pisa_status.err:
-#         print("Error occurred while converting HTML to PDF")
-#     else:
-#         print(f"PDF generated successfully: {output_filename}")
-#
-# # Example usage
-# convert_html_to_pdf('html', 'output.pdf')
 
 

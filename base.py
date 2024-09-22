@@ -3,17 +3,18 @@ from gpt_researcher.utils.enum import ReportSource, ReportType, Tone
 report_type_dict = {"Summary - Short and fast (~2 min)": "research_report",
                     "Resource Report": "resource_report",
                     "Subtopic report":"subtopic_report",
-                    "Chat with AI (without research)": "regular AI"
-                  # ,"multi_agents": "multi_agents"
+                    "Chat with AI (gpt-4o, without research)": "regular AI"
+                    # ,"multi_agents": "multi_agents"
                     # ,"detailed_report":"detailed_report"
-                    # ,"outline_report":"outline_report"
+                    ,"outline_report":"outline_report"
                     }  # , "multi_agents"
 
+
 tone_dict = {member.value: member.name for member in Tone}
-with open("gptr-logo-base64.txt", "r") as file:
+with open("assets/gptr-logo-base64.txt", "r") as file:
     logo_base64 = file.read()
 
-languages_direction = {
+languages_direction_rtl = {
     "Without translation": True,
     "English": True,
     "Spanish": True,

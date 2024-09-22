@@ -7,6 +7,7 @@ from markdown_pdf import MarkdownPdf, Section
 from io import StringIO
 
 from gpt_researcher import GPTResearcher
+# from gpt_researcher import DetailedReport
 import streamlit as st
 from base import *
 
@@ -14,7 +15,7 @@ from base import *
 
 st.set_page_config(  # https://docs.streamlit.io/develop/api-reference/configuration/st.set_page_config
     page_title="AI GPT Researcher",
-    page_icon="gptr-logo.png",
+    page_icon="assets/gptr-logo.png",
 )
 
 @contextmanager
@@ -47,9 +48,19 @@ output = st.empty()
 
 
 async def get_report(query: str, report_type: str, tone) -> str:
-    researcher = GPTResearcher(query, report_type, tone)
-    research_result = await researcher.conduct_research()
-    report = await researcher.write_report()
+    if report_type == 'detailed_report':
+
+        # detailed_report = DetailedReport(
+        #     query=query,
+        #     report_type="research_report",
+        #     report_source="web_search",
+        # )
+        # report = await detailed_report.run()
+        pass
+    else:
+        researcher = GPTResearcher(query, report_type, tone)
+        research_result = await researcher.conduct_research()
+        report = await researcher.write_report()
     return report
 
 
@@ -65,7 +76,7 @@ def submit_report(prompt, md_content, msg=None):
 
 def translate_report(prompt, report, lang):
     if lang != "Without translation":
-        st.chat_message("assistant").write("Wait 10s for your translated report...")
+        st.chat_message("assistant").write("Wait 15s for your translated report...")
         response = openai_client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
@@ -76,7 +87,7 @@ def translate_report(prompt, report, lang):
         )
         ai_response = response.choices[0].message.content
         ai_response_as_md = ai_response
-        if not languages_direction[lang]:
+        if not languages_direction_rtl[lang]:
             prepend_string = '<div style="direction: rtl; text-align: right;">\n\n'
             ai_response_as_md = f"{prepend_string}{ai_response}\n</div>"
 
@@ -95,6 +106,17 @@ def translate_question(prompt):
         return response.choices[0].message.content
     return prompt
 
+def chat_ai(prompt, ai_name):
+    response = openai_client.chat.completions.create(
+        model=ai_name,
+        messages=[{"role": "user", "content": prompt}]
+    )
+    ai_response = response.choices[0].message.content
+    st.chat_message("ai").markdown(ai_response)
+    st.session_state.messages.append({"role": "ai", "content": ai_response})
+
+
+
 
 def make_buttons(prompt, md_content):
     st.download_button(
@@ -110,7 +132,7 @@ def make_buttons(prompt, md_content):
                                       "mime":"text/markdown",
                                       "key" :f'{prompt}-{random.randint(-10 ** 9, 10 ** 9)}'})
     pdf = MarkdownPdf()
-    # with open("pdf_styles.css") as css_file:
+    # with open("assets/pdf_styles.css") as css_file:
     #     css = css_file.read()
     pdf.add_section(Section(md_content))
     pdf.writer.close()
@@ -159,13 +181,13 @@ with st.sidebar:
     tone = st.selectbox("In which tone would you like the report to be generated?", tone_dict.keys())
     report_type = st.selectbox("What type of report would you like me to generate?", report_type_dict.keys())
     show_logs = st.checkbox("Show the research process (logs)")
-    translate_box = st.selectbox("Translate the report to your language", languages_direction.keys(),help= "Select any other language to translate the report into")
+    translate_box = st.selectbox("Translate the report to your language", languages_direction_rtl.keys(), help="Select any other language to translate the report into")
     translate_question_box = st.checkbox("Search across the web in English", help= "Use this if your research question is not in English, but you want the research process to involve sources in English")
 
     st.markdown("---")
     st.markdown("# About")
     st.markdown("""
-    - GPT Researcher is an open-source project led by Asaf Elovic and is still in development. This project aims to provide a UI for accessing this amazing tool, and it is based on version 0.9.0.
+    - GPT Researcher is an open-source project led by Assaf Elovic and is still in development. This project aims to provide a UI for accessing this amazing tool, and it is based on version 0.9.6.
     - GPT Researcher takes care of everything from accurate source gathering to organization of research results - all in one platform designed to make your research process a breeze.  
     - The average research task takes around 3 minutes to complete, and costs ~$0.005. 
     - [GPT Researcher official page](https://gptr.dev/)
@@ -208,21 +230,12 @@ if prompt := st.chat_input():
         st.stop()
     try:
         if report_type_dict[report_type] == "regular AI":
-            response = openai_client.chat.completions.create(
-                model="gpt-4o-mini",
-                messages=[{"role": "user", "content": prompt}]
-            )
-            ai_response = response.choices[0].message.content
-            st.chat_message("ai").markdown(ai_response)
-            st.session_state.messages.append({"role": "ai", "content": ai_response})
+            english_prompt = translate_question(prompt)
+            chat_ai(english_prompt,"gpt-4o")
         else:
             english_prompt = translate_question(prompt)
-            # if show_logs:
             with stdout_capture(output.code):
                 report = asyncio.run(get_report(english_prompt, report_type_dict[report_type], tone))
-
-            # else:
-            #     report = asyncio.run(get_report(english_prompt, report_type_dict[report_type], tone))
             try:
                 msg = None
                 if translate_box != "Without translation":
