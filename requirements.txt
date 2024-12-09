@@ -1,5 +1,5 @@
 gpt_researcher == 0.9.6
 streamlit == 1.37.1
 markdown-pdf == 1.3
-openai == 1.41.1
+openai == 1.55.3
 duckduckgo-search == 6.2.10
