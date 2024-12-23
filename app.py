@@ -192,12 +192,11 @@ with st.sidebar:
     - The average research task takes around 3 minutes to complete, and costs ~$0.005. 
     - [GPT Researcher official page](https://gptr.dev/)
     """)
-    # st.markdown("---")
 
-    # st.markdown("Made with ❤️")
-    # for Daniela
-    # left, middle, right = st.columns([1,3,1], vertical_alignment="bottom")
-    # middle.link_button("Invite me for a coffee ☕", "https://ko-fi.com/C0C2125R0E")
+    st.markdown("---")
+    st.markdown("Made with ❤️")
+    left, middle, right = st.columns([1,3,1], vertical_alignment="bottom")
+    middle.link_button("Invite me for a coffee ☕", "https://ko-fi.com/C0C2125R0E")
 
 
 

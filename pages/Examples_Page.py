@@ -2,7 +2,7 @@ import streamlit as st
 st.set_page_config(  # https://docs.streamlit.io/develop/api-reference/configuration/st.set_page_config
     page_title="AI GPT Researcher examples",
     page_icon="assets/gptr-logo.png",
-    layout="wide",  # optional: you can also use "centered" for a more narrow layout
+    layout="wide",
 
 )
 with open("assets/gptr-logo-base64.txt", "r") as file:
@@ -21,10 +21,10 @@ with st.sidebar:
                 The #1 Open Source AI Research Agent
         </h2>
     </div>""")
-    # st.markdown("---")
-
-    # left, middle, right = st.columns([1,3,1], vertical_alignment="bottom")
-    # middle.link_button("Invite me for a coffee ☕", "https://ko-fi.com/C0C2125R0E")
+    st.markdown("---")
+    st.markdown("Made with ❤️")
+    left, middle, right = st.columns([1,3,1], vertical_alignment="bottom")
+    middle.link_button("Invite me for a coffee ☕", "https://ko-fi.com/C0C2125R0E")
 
 
 def show_md(q, md_file_path):
